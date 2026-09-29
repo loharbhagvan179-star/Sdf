@@ -1,0 +1,30 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="400dp"
+    android:height="180dp"
+    android:viewportWidth="400"
+    android:viewportHeight="180">
+    <!-- Indigo Gradient Background -->
+    <path
+        android:fillColor="#FF1E1B4B"
+        android:pathData="M0,0h400v180h-400z" />
+    <path
+        android:fillColor="#334F46E5"
+        android:pathData="M0,0 L400,180 L0,180 Z" />
+    <!-- Floating Gold Coins and sparkles -->
+    <path
+        android:fillColor="#FFFFB800"
+        android:pathData="M320,60 A24,24 0 1,0 320,108 A24,24 0 1,0 320,60 Z" />
+    <path
+        android:fillColor="#FFD97706"
+        android:pathData="M320,64 A20,20 0 1,0 320,104 A20,20 0 1,0 320,64 Z" />
+    <path
+        android:fillColor="#FFFFD700"
+        android:pathData="M360,30 A14,14 0 1,0 360,58 A14,14 0 1,0 360,30 Z" />
+    <path
+        android:fillColor="#FFFFB800"
+        android:pathData="M270,110 A16,16 0 1,0 270,142 A16,16 0 1,0 270,110 Z" />
+    <!-- Trophy Silhouette -->
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M312,74 L328,74 L328,84 C328,88 325,92 320,92 C315,92 312,88 312,84 Z" />
+</vector>

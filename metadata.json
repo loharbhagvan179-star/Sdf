@@ -1,0 +1,6 @@
+{
+  "name": "Quiz & Earn",
+  "description": "Earn virtual coins by completing quizzes and tasks, track transactions, and redeem rewards with admin management.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

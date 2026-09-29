@@ -1,0 +1,30 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- Coin Outer Glow & Base -->
+    <path
+        android:fillColor="#FFD97706"
+        android:pathData="M54,16 A38,38 0 1,0 54,92 A38,38 0 1,0 54,16 Z" />
+    <!-- Coin Inner Gold -->
+    <path
+        android:fillColor="#FFFFB800"
+        android:pathData="M54,20 A34,34 0 1,0 54,88 A34,34 0 1,0 54,20 Z" />
+    <!-- Inner Rim -->
+    <path
+        android:strokeColor="#FFFDE68A"
+        android:strokeWidth="1.5"
+        android:pathData="M54,24 A30,30 0 1,0 54,84 A30,30 0 1,0 54,24 Z" />
+    <!-- Question Mark Symbol on Coin -->
+    <path
+        android:fillColor="#FF78350F"
+        android:pathData="M50,38 C50,35.8 51.8,34 54,34 C56.2,34 58,35.8 58,38 C58,39.5 57,40.8 55.6,41.4 C53.4,42.4 52,44.6 52,47 L52,49 L56,49 L56,47.8 C56,46.8 56.6,45.8 57.4,45.4 C59.8,44.2 62,41.5 62,38 C62,33.6 58.4,30 54,30 C49.6,30 46,33.6 46,38 L50,38 Z M52,55 L56,55 L56,59 L52,59 Z" />
+    <!-- Star Sparkles -->
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M78,24 L80,30 L86,32 L80,34 L78,40 L76,34 L70,32 L76,30 Z" />
+    <path
+        android:fillColor="#FFFFD700"
+        android:pathData="M28,26 L29.5,31 L34,32.5 L29.5,34 L28,39 L26.5,34 L22,32.5 L26.5,31 Z" />
+</vector>
