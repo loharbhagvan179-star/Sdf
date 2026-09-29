@@ -19,6 +19,7 @@ import com.example.data.model.RedeemTier
 import com.example.ui.components.AppBackground
 import com.example.ui.components.AppBottomBar
 import com.example.ui.components.AppTopBar
+import com.example.ui.components.SubscribeChannelsDialog
 import com.example.ui.localization.AppLanguage
 import com.example.ui.screens.admin.AdminDashboardScreen
 import com.example.ui.screens.auth.AuthScreen
@@ -65,6 +66,7 @@ class MainActivity : ComponentActivity() {
 
             var currentRoute by remember { mutableStateOf("home") }
             var showAuthModal by remember { mutableStateOf(false) }
+            var showSubscribeChannelsDialog by remember { mutableStateOf(false) }
 
             val currentPlayingQuiz = activeQuiz
 
@@ -240,6 +242,7 @@ class MainActivity : ComponentActivity() {
                                     onOpenAdminDashboard = { currentRoute = "admin" },
                                     onQuickUserLogin = { viewModel.quickLoginDemoUser() },
                                     onQuickAdminLogin = { viewModel.quickLoginDemoAdmin() },
+                                    onOpenAuthModal = { showAuthModal = true },
                                     onLogout = { viewModel.logout() }
                                 )
                             }
@@ -249,21 +252,52 @@ class MainActivity : ComponentActivity() {
                         if (showAuthModal) {
                             AuthScreen(
                                 language = language,
-                                onLogin = { email, pass ->
-                                    viewModel.login(email, pass) { showAuthModal = false }
+                                onLoginWithEmail = { email, pass ->
+                                    viewModel.login(email, pass) {
+                                        showAuthModal = false
+                                        showSubscribeChannelsDialog = true
+                                    }
                                 },
-                                onSignup = { email, pass, name, mobile ->
-                                    viewModel.signup(email, pass, name, mobile) { showAuthModal = false }
+                                onLoginWithMobile = { mobile, pass ->
+                                    viewModel.loginWithMobile(mobile, pass) {
+                                        showAuthModal = false
+                                        showSubscribeChannelsDialog = true
+                                    }
+                                },
+                                onSignupWithEmail = { email, pass, name, mobile ->
+                                    viewModel.signup(email, pass, name, mobile) {
+                                        showAuthModal = false
+                                        showSubscribeChannelsDialog = true
+                                    }
+                                },
+                                onSignupWithMobile = { mobile, name, pass ->
+                                    viewModel.signupWithMobile(mobile, name, pass) {
+                                        showAuthModal = false
+                                        showSubscribeChannelsDialog = true
+                                    }
                                 },
                                 onQuickUserLogin = {
                                     viewModel.quickLoginDemoUser()
                                     showAuthModal = false
+                                    showSubscribeChannelsDialog = true
                                 },
                                 onQuickAdminLogin = {
                                     viewModel.quickLoginDemoAdmin()
                                     showAuthModal = false
                                 },
                                 onDismiss = { showAuthModal = false }
+                            )
+                        }
+
+                        // Subscribe Channels Dialog after login/sign up
+                        if (showSubscribeChannelsDialog) {
+                            SubscribeChannelsDialog(
+                                language = language,
+                                onClaimReward = {
+                                    viewModel.claimChannelsSubscription()
+                                    showSubscribeChannelsDialog = false
+                                },
+                                onDismiss = { showSubscribeChannelsDialog = false }
                             )
                         }
                     }

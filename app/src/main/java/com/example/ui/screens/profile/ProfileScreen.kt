@@ -38,11 +38,11 @@ fun ProfileScreen(
     onOpenAdminDashboard: () -> Unit,
     onQuickUserLogin: () -> Unit,
     onQuickAdminLogin: () -> Unit,
+    onOpenAuthModal: () -> Unit = {},
     onLogout: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
-    var showAuthModal by remember { mutableStateOf(false) }
 
     LazyColumn(
         modifier = modifier
@@ -57,7 +57,7 @@ fun ProfileScreen(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(24.dp),
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                elevation = CardDefaults.cardElevation(defaultElevation = 3.dp)
+                elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
             ) {
                 Column(
                     modifier = Modifier
@@ -68,7 +68,7 @@ fun ProfileScreen(
                     // Avatar
                     Box(
                         modifier = Modifier
-                            .size(72.dp)
+                            .size(76.dp)
                             .clip(CircleShape)
                             .background(MaterialTheme.colorScheme.primaryContainer),
                         contentAlignment = Alignment.Center
@@ -89,42 +89,130 @@ fun ProfileScreen(
                         fontWeight = FontWeight.Bold
                     )
 
-                    Spacer(modifier = Modifier.height(2.dp))
+                    Spacer(modifier = Modifier.height(6.dp))
 
-                    Text(
-                        text = user?.email ?: "Not logged in",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
+                    // Identity Details (Email or Mobile Number)
+                    Surface(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(14.dp),
+                        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+                    ) {
+                        Column(
+                            modifier = Modifier.padding(12.dp),
+                            verticalArrangement = Arrangement.spacedBy(6.dp)
+                        ) {
+                            if (user?.mobile?.isNotBlank() == true) {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.Phone,
+                                        contentDescription = null,
+                                        tint = PrimaryIndigo,
+                                        modifier = Modifier.size(18.dp)
+                                    )
+                                    Text(
+                                        text = (if (language == AppLanguage.HINDI) "मोबाइल नंबर: " else "Mobile: ") +
+                                                (if (user.mobile.startsWith("+91")) user.mobile else "+91 ${user.mobile}"),
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        fontWeight = FontWeight.SemiBold
+                                    )
+                                }
+                            }
 
-                    if (user?.mobile?.isNotBlank() == true) {
-                        Text(
-                            text = user.mobile,
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
+                            if (user?.email?.isNotBlank() == true) {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.Email,
+                                        contentDescription = null,
+                                        tint = PrimaryIndigo,
+                                        modifier = Modifier.size(18.dp)
+                                    )
+                                    Text(
+                                        text = (if (language == AppLanguage.HINDI) "ईमेल आईडी: " else "Email: ") + user.email,
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        fontWeight = FontWeight.SemiBold
+                                    )
+                                }
+                            }
+
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Badge,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    modifier = Modifier.size(18.dp)
+                                )
+                                Text(
+                                    text = "UID: " + (user?.uid ?: "N/A"),
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                        }
                     }
 
-                    Spacer(modifier = Modifier.height(12.dp))
+                    Spacer(modifier = Modifier.height(10.dp))
 
-                    // Role Badge
-                    Surface(
-                        shape = RoundedCornerShape(10.dp),
-                        color = if (user?.role == "admin") Color(0xFFEF4444).copy(alpha = 0.15f) else PrimaryIndigo.copy(alpha = 0.15f)
+                    // Role & Download Bonus Badges
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text(
-                            text = if (user?.role == "admin") "🛡️ MASTER ADMIN" else "🎮 VERIFIED PLAYER",
-                            color = if (user?.role == "admin") Color(0xFFEF4444) else PrimaryIndigo,
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 11.sp,
-                            modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
-                        )
+                        Surface(
+                            shape = RoundedCornerShape(10.dp),
+                            color = if (user?.role == "admin") Color(0xFFEF4444).copy(alpha = 0.15f) else PrimaryIndigo.copy(alpha = 0.15f)
+                        ) {
+                            Text(
+                                text = if (user?.role == "admin") "🛡️ MASTER ADMIN" else "🎮 VERIFIED PLAYER",
+                                color = if (user?.role == "admin") Color(0xFFEF4444) else PrimaryIndigo,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 11.sp,
+                                modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
+                            )
+                        }
+
+                        Surface(
+                            shape = RoundedCornerShape(10.dp),
+                            color = CoinGold.copy(alpha = 0.2f)
+                        ) {
+                            Text(
+                                text = "🎁 ₹200 BONUS ACTIVE",
+                                color = CoinGold,
+                                fontWeight = FontWeight.ExtraBold,
+                                fontSize = 11.sp,
+                                modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
+                            )
+                        }
                     }
 
                     Spacer(modifier = Modifier.height(14.dp))
 
                     if (user != null) {
                         CoinBadge(coins = user.coins)
+                    }
+
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    OutlinedButton(
+                        onClick = onOpenAuthModal,
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(12.dp)
+                    ) {
+                        Icon(imageVector = Icons.Default.SwitchAccount, contentDescription = null, modifier = Modifier.size(18.dp))
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = if (language == AppLanguage.HINDI) "अन्य ईमेल / मोबाइल से साइन इन करें" else "Sign In with Another Account",
+                            fontWeight = FontWeight.SemiBold,
+                            fontSize = 12.sp
+                        )
                     }
                 }
             }

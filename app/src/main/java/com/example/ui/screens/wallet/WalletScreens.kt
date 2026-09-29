@@ -29,6 +29,8 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import com.example.data.model.*
 import com.example.ui.localization.AppLanguage
 import com.example.ui.localization.StringsLocalization
@@ -246,6 +248,15 @@ fun RedeemScreen(
     var selectedTierIndex by remember { mutableStateOf(1) } // ₹20 standard default
     var selectedPayoutMethod by remember { mutableStateOf(PayoutMethod.GOOGLE_PLAY) }
     var accountInput by remember { mutableStateOf("") }
+
+    var showCelebrationDialog by remember { mutableStateOf(false) }
+    var activeCelebrationRequest by remember { mutableStateOf<RedeemRequest?>(null) }
+
+    LaunchedEffect(redeemRequests) {
+        if (showCelebrationDialog && redeemRequests.isNotEmpty()) {
+            activeCelebrationRequest = redeemRequests.first()
+        }
+    }
 
     // Sync method when tab changes
     LaunchedEffect(selectedCategoryTab) {
@@ -764,6 +775,7 @@ fun RedeemScreen(
         item {
             Button(
                 onClick = {
+                    showCelebrationDialog = true
                     onSubmitRedeem(currentTier, selectedPayoutMethod, accountInput)
                     accountInput = ""
                 },
@@ -823,6 +835,161 @@ fun RedeemScreen(
 
         item {
             Spacer(modifier = Modifier.height(30.dp))
+        }
+    }
+
+    // Instant Code Celebration Dialog (Shows direct code without waiting!)
+    if (showCelebrationDialog && activeCelebrationRequest != null) {
+        val req = activeCelebrationRequest!!
+        val clipboardManager = LocalClipboardManager.current
+
+        Dialog(
+            onDismissRequest = {
+                showCelebrationDialog = false
+                activeCelebrationRequest = null
+            },
+            properties = DialogProperties(dismissOnBackPress = true, dismissOnClickOutside = false)
+        ) {
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(8.dp),
+                shape = RoundedCornerShape(24.dp),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                elevation = CardDefaults.cardElevation(14.dp)
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(20.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(64.dp)
+                            .clip(CircleShape)
+                            .background(Color(0xFF00875A).copy(alpha = 0.2f)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(text = "🎉", fontSize = 32.sp)
+                    }
+
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    Text(
+                        text = if (language == AppLanguage.HINDI) "रिडीम कोड तुरंत प्राप्त हुआ!" else "Instant Redeem Code!",
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Black
+                    )
+
+                    Spacer(modifier = Modifier.height(4.dp))
+
+                    Text(
+                        text = if (language == AppLanguage.HINDI)
+                            "बधाई हो! आपका ₹${req.rewardAmountInInr} का प्ले स्टोर रिडीम कोड तैयार है।"
+                        else
+                            "Congratulations! Your ₹${req.rewardAmountInInr} Play Store voucher is ready.",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    if (req.redeemCode != null) {
+                        Surface(
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(16.dp),
+                            color = Color(0xFF0F281E),
+                            border = androidx.compose.foundation.BorderStroke(1.5.dp, Color(0xFF00875A))
+                        ) {
+                            Column(
+                                modifier = Modifier.padding(16.dp),
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
+                                Text(
+                                    text = "OFFICIAL GOOGLE PLAY CODE",
+                                    fontSize = 11.sp,
+                                    fontWeight = FontWeight.ExtraBold,
+                                    color = Color(0xFFA7F3D0),
+                                    letterSpacing = 1.sp
+                                )
+                                Spacer(modifier = Modifier.height(8.dp))
+                                Text(
+                                    text = req.redeemCode,
+                                    fontWeight = FontWeight.Black,
+                                    fontSize = 20.sp,
+                                    letterSpacing = 1.5.sp,
+                                    color = Color.White
+                                )
+                            }
+                        }
+
+                        Spacer(modifier = Modifier.height(16.dp))
+
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(10.dp)
+                        ) {
+                            OutlinedButton(
+                                onClick = {
+                                    clipboardManager.setText(AnnotatedString(req.redeemCode))
+                                    Toast.makeText(context, if (language == AppLanguage.HINDI) "कोड कॉपी हो गया!" else "Code copied!", Toast.LENGTH_SHORT).show()
+                                },
+                                modifier = Modifier.weight(1f),
+                                shape = RoundedCornerShape(12.dp)
+                            ) {
+                                Icon(imageVector = Icons.Default.ContentCopy, contentDescription = null, modifier = Modifier.size(16.dp))
+                                Spacer(modifier = Modifier.width(6.dp))
+                                Text(if (language == AppLanguage.HINDI) "कॉपी करें" else "Copy Code", fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                            }
+
+                            Button(
+                                onClick = {
+                                    try {
+                                        val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/redeem?code=${req.redeemCode}"))
+                                        context.startActivity(intent)
+                                    } catch (_: Exception) {
+                                        clipboardManager.setText(AnnotatedString(req.redeemCode))
+                                        Toast.makeText(context, "Code copied! Open Play Store to redeem.", Toast.LENGTH_SHORT).show()
+                                    }
+                                },
+                                modifier = Modifier.weight(1f),
+                                shape = RoundedCornerShape(12.dp),
+                                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF00875A))
+                            ) {
+                                Icon(imageVector = Icons.Default.Shop, contentDescription = null, modifier = Modifier.size(16.dp))
+                                Spacer(modifier = Modifier.width(6.dp))
+                                Text(if (language == AppLanguage.HINDI) "Play Store खोलें" else "Open Store", fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                            }
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    Text(
+                        text = if (language == AppLanguage.HINDI)
+                            "• Play Store में जाकर Profile -> Payments & Subscriptions -> Redeem Code में यह कोड पेस्ट करके ₹${req.rewardAmountInInr} बैलेंस जोड़ें।"
+                        else
+                            "• Go to Google Play Store -> Profile -> Payments & subscriptions -> Redeem code to claim your ₹${req.rewardAmountInInr} balance.",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        fontSize = 11.sp
+                    )
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    FilledTonalButton(
+                        onClick = {
+                            showCelebrationDialog = false
+                            activeCelebrationRequest = null
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(12.dp)
+                    ) {
+                        Text(if (language == AppLanguage.HINDI) "ठीक है (पूर्ण)" else "Done", fontWeight = FontWeight.Bold)
+                    }
+                }
+            }
         }
     }
 }

@@ -21,6 +21,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     val tasks = repository.tasks
     val allUsers = repository.allUsers
     val redeemCodes = repository.redeemCodes
+    val hasSubscribedChannels = repository.hasSubscribedChannels
 
     private val _language = MutableStateFlow(AppLanguage.ENGLISH)
     val language: StateFlow<AppLanguage> = _language.asStateFlow()
@@ -118,6 +119,18 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    fun loginWithMobile(mobile: String, pass: String, onSuccess: () -> Unit) {
+        viewModelScope.launch {
+            val result = repository.loginWithMobile(mobile, pass)
+            result.onSuccess {
+                showMessage("Welcome, ${it.displayName}! +200 Welcome Coins added.")
+                onSuccess()
+            }.onFailure {
+                showMessage(it.message ?: "Mobile Login failed")
+            }
+        }
+    }
+
     fun signup(email: String, pass: String, name: String, mobile: String, onSuccess: () -> Unit) {
         viewModelScope.launch {
             val result = repository.signupWithEmail(email, pass, name, mobile)
@@ -126,6 +139,33 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 onSuccess()
             }.onFailure {
                 showMessage(it.message ?: "Signup failed")
+            }
+        }
+    }
+
+    fun signupWithMobile(mobile: String, name: String, pass: String, onSuccess: () -> Unit) {
+        viewModelScope.launch {
+            val result = repository.signupWithMobile(mobile, name, pass)
+            result.onSuccess {
+                showMessage("Account created! 200 welcome coins added.")
+                onSuccess()
+            }.onFailure {
+                showMessage(it.message ?: "Mobile Signup failed")
+            }
+        }
+    }
+
+    fun claimChannelsSubscription() {
+        viewModelScope.launch {
+            val result = repository.claimChannelsSubscriptionReward()
+            result.onSuccess { bonus ->
+                if (bonus > 0) {
+                    showMessage("Subscribed to both channels! +$bonus Bonus Coins added to wallet.")
+                } else {
+                    showMessage("Channel subscription verified!")
+                }
+            }.onFailure {
+                showMessage(it.message ?: "Error verifying channels subscription")
             }
         }
     }
